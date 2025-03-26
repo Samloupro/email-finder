@@ -12,6 +12,15 @@ async function handleRequest(request) {
     );
   }
 
+  // Vérification que la binding KV_API_KEYS est configurée
+  if (typeof KV_API_KEYS === 'undefined') {
+    console.error('KV_API_KEYS binding is not configured.');
+    return new Response(
+      JSON.stringify([{ erreur: 'KV_API_KEYS binding not configured' }]),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+
   // Vérification directe dans le KV store
   try {
     const keyExists = await KV_API_KEYS.get(rawApiKey);
@@ -24,7 +33,7 @@ async function handleRequest(request) {
   } catch (e) {
     console.error('KV store error:', e);
     return new Response(
-      JSON.stringify([{ erreur: 'Erreur interne du serveur' }]),
+      JSON.stringify([{ erreur: 'Erreur interne du serveur', details: e && e.toString() }]),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
@@ -107,17 +116,22 @@ async function verifyEmails(emails, token) {
   let lastRejected = null;
   for (const email of emails) {
     verificationOps++;
+    console.log(`Verifying email: ${email}`);
     const url = `https://happy.mailtester.ninja/ninja?email=${encodeURIComponent(email)}&token=${token}`;
     let apiResponse;
     try {
       apiResponse = await fetch(url);
+      console.log("Response status:", apiResponse.status);
     } catch (e) {
+      console.error(`Error fetching ${email}:`, e);
       continue;
     }
     let result;
     try {
       result = await apiResponse.json();
+      console.log(`Result for ${email}:`, result);
     } catch (e) {
+      console.error(`Error parsing JSON for ${email}:`, e);
       continue;
     }
     const msg = result.message;
@@ -140,7 +154,7 @@ async function verifyEmails(emails, token) {
     final.ver_ops = verificationOps;
     return final;
   }
-  return lastRejected;
+  return { email: "", status: "error", message: "No valid response from external API", ver_ops: verificationOps };
 }
 
 function finalizeResult(result) {
