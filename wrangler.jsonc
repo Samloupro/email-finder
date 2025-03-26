@@ -1,5 +1,5 @@
 {
-  "name": "worker-name",
+  "name": "email-finder",
   "compatibility_date": "2025-03-26",
   "main": "./code_worker.txt"
 }
