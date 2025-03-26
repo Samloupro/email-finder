@@ -40,16 +40,16 @@ async function handleRequest(request) {
       const tokenVal = (token || '').trim();
 
       if (!fullName || !companyWebsite) {
-      return new Response(
-        JSON.stringify([{ erreur: 'full_name or company_website is missing' }]),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        return new Response(
+          JSON.stringify([{ erreur: 'full_name or company_website is missing' }]),
+          { status: 400, headers: { 'Content-Type': 'application/json' } }
         );
       }
       
       if (!tokenVal) {
-      return new Response(
-        JSON.stringify([{ erreur: 'Token Empty' }]),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        return new Response(
+          JSON.stringify([{ erreur: 'Token Empty' }]),
+          { status: 400, headers: { 'Content-Type': 'application/json' } }
         );
       }
       
@@ -58,27 +58,27 @@ async function handleRequest(request) {
       if (match) {
         companyWebsite = match[2];
       } else {
-      return new Response(
-        JSON.stringify([{ erreur: 'Invalid company website format' }]),
-        { status: 422, headers: { 'Content-Type': 'application/json' } }
+        return new Response(
+          JSON.stringify([{ erreur: 'Invalid company website format' }]),
+          { status: 422, headers: { 'Content-Type': 'application/json' } }
         );
       }
       
       // Génération des permutations d'emails
       const emails = generateEmailPermutations(fullName, companyWebsite);
       if (emails.length === 0) {
-      return new Response(
-        JSON.stringify([{ erreur: 'Permutation generation failed' }]),
-        { status: 422, headers: { 'Content-Type': 'application/json' } }
+        return new Response(
+          JSON.stringify([{ erreur: 'Permutation generation failed' }]),
+          { status: 422, headers: { 'Content-Type': 'application/json' } }
         );
       }
       
       // Vérification des emails en passant le token fourni
       const verificationResult = await verifyEmails(emails, tokenVal);
       if (!verificationResult) {
-      return new Response(
-        JSON.stringify([{ erreur: "Email verification failed" }]),
-        { status: 500, headers: { "Content-Type": "application/json" } }
+        return new Response(
+          JSON.stringify([{ erreur: "Email verification failed" }]),
+          { status: 500, headers: { "Content-Type": "application/json" } }
         );
       }
       verificationResult.time_exec = (Date.now() - startTime) / 1000;
